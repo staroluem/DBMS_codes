@@ -1,0 +1,22 @@
+//trigger- clientmstr 7 audit_trade
+
+create or replace trigger tridelete
+after delete on clientmstr
+for each row
+begin
+    insert into audit_trade(id,column2,column3,column4,action)
+    values(:old.id,:old.name,:old.column2,:old.balance,'delete');
+end;
+
+create or replace trigger trigupdate
+after update on clientmstr
+for each row
+begin
+    insert into audit_trade(id,column2,column3,column4,action)
+    values(:old.id,:old.name,:old.column2,:old.balance,'update');
+end;
+
+update clientmstr
+set balance=70000
+where id=2;
+delete from clientmstr where id=2;

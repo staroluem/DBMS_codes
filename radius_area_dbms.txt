@@ -1,0 +1,25 @@
+//radius area code
+
+create table areas(radius number,area number);
+
+declare
+	area number;
+begin
+	for radius in 5..9 loop
+	area:=3.14*radius*radius;
+	insert into areas values(radius,area);
+end loop;
+commit;
+exception
+	when others then
+	rollback;
+	dbms_output.put_line('error;'||sqlerrm);
+end;
+select*from areas;
+
+////output////
+5	78.5
+6	113.04
+7	153.86
+8	200.96
+9	254.34
