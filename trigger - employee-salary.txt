@@ -1,0 +1,44 @@
+//trigger - employee-salary
+CREATE TABLE Emp (
+    emp_id number primary key,
+    emp_name varchar2(100),
+    salary number,
+    designation varchar(50)
+);
+CREATE TABLE tracking(
+    emp_id number,
+    old_salary number,
+    new_salary number,
+    salary_diff number,
+    CONSTRAINTS fk_emp FOREIGN KEY(emp_id) REFERENCES Emp(emp_id)   
+);
+INSERT INTO Emp(emp_id,emp_name,salary,designation) VALUES(101,'alice',75000,'manager');
+INSERT INTO Emp(emp_id,emp_name,salary,designation) VALUES(102,'ali',95000,'CEO');
+INSERT INTO Emp(emp_id,emp_name,salary,designation) VALUES(103,'Anuja',85000,'Hacker');
+INSERT INTO Emp(emp_id,emp_name,salary,designation) VALUES(104,'Yumiko',65000,'Developer');
+
+CREATE OR REPLACE TRIGGER trg
+AFTER UPDATE OF salary on Emp
+FOR EACH ROW
+WHEN (OLD.salary!=NEW.salary) 
+BEGIN
+ INSERT INTO tracking(emp_id,old_salary,new_salary,salary_diff)
+ VALUES (:OLD.emp_id,:OLD.salary,:NEW.salary,:NEW.salary-:OLD.salary);
+END;
+/
+CREATE OR REPLACE TRIGGER trg_del
+BEFORE DELETE on Emp
+FOR EACH ROW
+BEGIN
+IF :OLD.designation='CEO' THEN
+RAISE_APPLICATION_ERROR(-20001,'you cannot delete an employee with designation CEO');
+END IF;
+END;
+/
+update Emp
+set salary=85000
+where emp_id =101;
+delete from Emp
+where emp_id=102;
+select*from tracking;
+
