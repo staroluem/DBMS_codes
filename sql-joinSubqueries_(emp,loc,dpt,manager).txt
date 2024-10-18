@@ -1,0 +1,91 @@
+-- Create Locations table
+CREATE TABLE Locations (
+    Location_id NUMBER PRIMARY KEY,
+    Street_address VARCHAR2(255),
+    Postal_code VARCHAR2(20),
+    City VARCHAR2(100),
+    State VARCHAR2(100),
+    Country_id VARCHAR2(2)
+);
+
+-- Create Departments table
+CREATE TABLE Departments (
+    Department_id NUMBER PRIMARY KEY,
+    Department_name VARCHAR2(100),
+    Manager_id NUMBER,
+    Location_id NUMBER,
+    CONSTRAINT fk_location FOREIGN KEY (Location_id) REFERENCES Locations(Location_id)
+);
+
+-- Create Manager table
+CREATE TABLE Manager (
+    Manager_id NUMBER PRIMARY KEY,
+    Manager_name VARCHAR2(100)
+);
+
+-- Create Employee table
+CREATE TABLE Employee (
+    Employee_id NUMBER PRIMARY KEY,
+    First_name VARCHAR2(100),
+    Last_name VARCHAR2(100),
+    Hire_date DATE,
+    Salary NUMBER,
+    Job_title VARCHAR2(100),
+    Manager_id NUMBER,
+    Department_id NUMBER,
+    CONSTRAINT fk_manager FOREIGN KEY (Manager_id) REFERENCES Manager(Manager_id),
+    CONSTRAINT fk_department FOREIGN KEY (Department_id) REFERENCES Departments(Department_id)
+);
+
+-- Insert sample data into Locations table
+INSERT INTO Locations VALUES (1, '123 Main St', '12345', 'New York', 'NY', 'US');
+INSERT INTO Locations VALUES (2, '456 Elm St', '67890', 'San Francisco', 'CA', 'US');
+
+-- Insert sample data into Departments table
+INSERT INTO Departments VALUES (1, 'IT', 1, 1);
+INSERT INTO Departments VALUES (2, 'HR', 2, 2);
+INSERT INTO Departments VALUES (3, 'Finance', 3, 1);
+
+-- Insert sample data into Manager table
+INSERT INTO Manager VALUES (1, 'John Smith');
+INSERT INTO Manager VALUES (2, 'Jane Doe');
+INSERT INTO Manager VALUES (3, 'Alice Johnson');
+
+-- Insert sample data into Employee table
+INSERT INTO Employee VALUES (101, 'Bob', 'Williams', TO_DATE('2008-06-10', 'YYYY-MM-DD'), 90000, 'Developer', 1, 1);
+INSERT INTO Employee VALUES (102, 'Eve', 'Adams', TO_DATE('2005-08-12', 'YYYY-MM-DD'), 50000, 'HR Specialist', 2, 2);
+INSERT INTO Employee VALUES (103, 'Charlie', 'Brown', TO_DATE('2010-11-05', 'YYYY-MM-DD'), 120000, 'CFO', 3, 3);
+INSERT INTO Employee VALUES (104, 'Dana', 'White', TO_DATE('2004-07-15', 'YYYY-MM-DD'), 75000, 'IT Manager', 1, 1);
+
+-- Query 1: Find employees who earn more than the average salary and work in IT departments
+SELECT e.First_name, e.Last_name, e.Salary
+FROM Employee e
+JOIN Departments d ON e.Department_id = d.Department_id
+WHERE e.Salary > (SELECT AVG(Salary) FROM Employee)
+AND d.Department_name = 'IT';
+
+-- Query 2: Find employees who earn the same salary as the minimum salary across all departments
+SELECT e.First_name, e.Last_name, e.Salary
+FROM Employee e
+WHERE e.Salary = (SELECT MIN(Salary) FROM Employee);
+
+-- Query 3: Find employees whose salary is above average for their departments
+SELECT e.Employee_id, e.First_name, e.Last_name, e.Salary
+FROM Employee e
+JOIN Departments d ON e.Department_id = d.Department_id
+WHERE e.Salary > (SELECT AVG(Salary) 
+                  FROM Employee 
+                  WHERE Department_id = e.Department_id);
+
+-- Query 4: Display the department name, manager name, and city
+SELECT d.Department_name, m.Manager_name, l.City
+FROM Departments d
+JOIN Manager m ON d.Manager_id = m.Manager_id
+JOIN Locations l ON d.Location_id = l.Location_id;
+
+-- Query 5: Display the name, hire date, salary of all managers whose experience is more than 15 years
+SELECT e.First_name, e.Last_name, e.Hire_date, e.Salary
+FROM Employee e
+JOIN Manager m ON e.Manager_id = m.Manager_id
+WHERE e.Job_title LIKE '%Manager%'
+AND (SYSDATE - e.Hire_date) / 365 > 15;
