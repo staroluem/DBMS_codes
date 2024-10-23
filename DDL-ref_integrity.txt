@@ -1,0 +1,50 @@
+-- Create Customer table
+CREATE TABLE Customer (
+    CustID INT PRIMARY KEY,
+    Name VARCHAR(100),
+    Cust_Address VARCHAR(255),
+    Phone_no VARCHAR(15),
+    Email_ID VARCHAR(100),
+    Age INT
+);
+
+-- Create Branch table
+CREATE TABLE Branch (
+    BranchID INT PRIMARY KEY,
+    Branch_Name VARCHAR(100),
+    Address VARCHAR(255)
+);
+
+-- Create Account table with referential integrity to Customer and Branch tables
+CREATE TABLE Account (
+    Account_no INT PRIMARY KEY,
+    BranchID INT,
+    CustID INT,
+    date_open DATE,
+    Account_type VARCHAR(50),
+    Balance DECIMAL(10, 2),
+    FOREIGN KEY (BranchID) REFERENCES Branch(BranchID),
+    FOREIGN KEY (CustID) REFERENCES Customer(CustID)
+);
+
+3
+CREATE INDEX idx_account_pk ON Account(Account_no);
+
+4
+CREATE VIEW Customer_Info AS
+SELECT CustID, Name, Cust_Address, Phone_no, Email_ID, Age
+FROM Customer
+WHERE Age < 45;
+
+5
+UPDATE Account
+SET date_open = '2017-04-16'
+WHERE CustID IN (SELECT CustID FROM Customer_Info);
+
+6
+CREATE SEQUENCE branch_seq
+START WITH 1
+INCREMENT BY 1;
+
+7
+CREATE SYNONYM Branch_info FOR Branch;
