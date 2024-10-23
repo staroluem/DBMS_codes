@@ -1,0 +1,84 @@
+Q.1--------------------------------------------------
+CREATE OR REPLACE PROCEDURE record_employee_commission (
+    p_emp_id IN Employee.emp_id%TYPE
+)
+IS
+    v_salary    Employee.salary%TYPE;
+    v_doj       Employee.DoJ%TYPE;
+    v_commission NUMBER;
+    v_years_exp  NUMBER;
+BEGIN
+    -- Fetch employee salary and date of joining
+    SELECT salary, DoJ
+    INTO v_salary, v_doj
+    FROM Employee
+    WHERE emp_id = p_emp_id;
+
+    -- Calculate years of experience
+    v_years_exp := EXTRACT(YEAR FROM SYSDATE) - EXTRACT(YEAR FROM v_doj);
+
+    -- Determine the commission based on the given conditions
+    IF v_salary > 10000 THEN
+        v_commission := 0.004;  -- 0.4% for salary > 10000
+    ELSIF v_salary < 10000 AND v_years_exp > 10 THEN
+        v_commission := 0.0035;  -- 0.35% for salary < 10000 and experience > 10 years
+    ELSIF v_salary < 3000 THEN
+        v_commission := 0.0025;  -- 0.25% for salary < 3000
+    ELSE
+        v_commission := 0.0015;  -- 0.15% for remaining cases
+    END IF;
+
+    -- Update the commission in the Employee table
+    UPDATE Employee
+    SET commission = v_commission
+    WHERE emp_id = p_emp_id;
+
+    -- Commit the transaction
+    COMMIT;
+
+    DBMS_OUTPUT.PUT_LINE('Commission updated for Employee ID: ' || p_emp_id || ' with commission rate: ' || (v_commission * 100) || '%');
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Employee ID ' || p_emp_id || ' not found.');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+END;
+-----------------------------------------------------------------------
+Q.2
+CREATE OR REPLACE FUNCTION get_manager_name (
+    p_dept_id IN Employee.dept_id%TYPE
+)
+RETURN VARCHAR2
+IS
+    v_manager_name Employee.emp_name%TYPE;
+BEGIN
+    -- Fetch the manager's name from the Employee table
+    SELECT emp_name
+    INTO v_manager_name
+    FROM Employee
+    WHERE dept_id = p_dept_id
+      AND job_title = 'Manager';
+
+    -- Return the manager's name
+    RETURN v_manager_name;
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN 'No manager found for Department ID ' || p_dept_id;
+    WHEN OTHERS THEN
+        RETURN 'An error occurred: ' || SQLERRM;
+END;
+/
+BEGIN
+    record_employee_commission(115);
+END;
+/
+DECLARE
+    v_manager_name VARCHAR2(100);
+BEGIN
+    v_manager_name := get_manager_name(10);
+    DBMS_OUTPUT.PUT_LINE('Manager Name: ' || v_manager_name);
+END;
+/
+
