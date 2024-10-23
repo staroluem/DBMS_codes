@@ -1,0 +1,86 @@
+CREATE TABLE Products (
+    Product_id NUMBER PRIMARY KEY,
+    Product_Name VARCHAR2(100),
+    Product_Type VARCHAR2(50),
+    Price NUMBER
+);
+
+-- Insert sample data into the Products table
+INSERT INTO Products (Product_id, Product_Name, Product_Type, Price) VALUES (1, 'Shirt', 'Apparel', 3000);
+INSERT INTO Products (Product_id, Product_Name, Product_Type, Price) VALUES (2, 'Trousers', 'Apparel', 4000);
+INSERT INTO Products (Product_id, Product_Name, Product_Type, Price) VALUES (3, 'Laptop', 'Electronics', 70000);
+INSERT INTO Products (Product_id, Product_Name, Product_Type, Price) VALUES (4, 'Shoes', 'Apparel', 5000);
+INSERT INTO Products (Product_id, Product_Name, Product_Type, Price) VALUES (5, 'Smartphone', 'Electronics', 25000);
+INSERT INTO Products (Product_id, Product_Name, Product_Type, Price) VALUES (6, 'Hat', 'Apparel', 1500);
+INSERT INTO Products (Product_id, Product_Name, Product_Type, Price) VALUES (7, 'Watch', 'Accessories', 6000);
+INSERT INTO Products (Product_id, Product_Name, Product_Type, Price) VALUES (8, 'Jacket', 'Apparel', 5000);
+INSERT INTO Products (Product_id, Product_Name, Product_Type, Price) VALUES (9, 'Tablet', 'Electronics', 20000);
+INSERT INTO Products (Product_id, Product_Name, Product_Type, Price) VALUES (10, 'Backpack', 'Accessories', 3000);
+
+-- Commit the inserts
+COMMIT;
+
+-- PL/SQL Block with all 3 tasks
+DECLARE
+  -- Variables for task 1 (Parameterized Cursor)
+  CURSOR c_apparel_products(p_min_price NUMBER, p_max_price NUMBER) IS
+    SELECT Product_id, Product_Name, Product_Type, Price
+    FROM Products
+    WHERE Product_Type = 'Apparel' AND Price BETWEEN p_min_price AND p_max_price;
+    
+  v_product_id Products.Product_id%TYPE;
+  v_product_name Products.Product_Name%TYPE;
+  v_product_type Products.Product_Type%TYPE;  -- Added this variable
+  v_price Products.Price%TYPE;
+
+  -- Variables for user input
+  v_min_price NUMBER := 2000;  -- Replace with actual user input
+  v_max_price NUMBER := 6000;  -- Replace with actual user input
+
+  -- Variables for task 2 (Explicit Cursor)
+  CURSOR c_expensive_products IS
+    SELECT Product_id, Product_Name, Product_Type, Price
+    FROM Products
+    WHERE Price > 5000;
+
+  v_exp_product_id Products.Product_id%TYPE;
+  v_exp_product_name Products.Product_Name%TYPE;
+  v_exp_product_type Products.Product_Type%TYPE;
+  v_exp_price Products.Price%TYPE;
+
+BEGIN
+  -- Task 1: Parameterized Cursor for Products in Price Range of Type 'Apparel'
+  DBMS_OUTPUT.PUT_LINE('--- Products of Type "Apparel" in Price Range ---');
+  
+  OPEN c_apparel_products(v_min_price, v_max_price);
+  
+  LOOP
+    FETCH c_apparel_products INTO v_product_id, v_product_name, v_product_type, v_price;  -- Match the number of variables
+    EXIT WHEN c_apparel_products%NOTFOUND;
+    DBMS_OUTPUT.PUT_LINE('Product ID: ' || v_product_id || ', Product Name: ' || v_product_name || ', Type: ' || v_product_type || ', Price: ' || v_price);
+  END LOOP;
+
+  CLOSE c_apparel_products;
+  
+  -- Task 2: Explicit Cursor for Products with Price > 5000
+  DBMS_OUTPUT.PUT_LINE('--- Products with Price Greater Than 5000 ---');
+  
+  OPEN c_expensive_products;
+
+  LOOP
+    FETCH c_expensive_products INTO v_exp_product_id, v_exp_product_name, v_exp_product_type, v_exp_price;
+    EXIT WHEN c_expensive_products%NOTFOUND;
+    DBMS_OUTPUT.PUT_LINE('Product ID: ' || v_exp_product_id || ', Product Name: ' || v_exp_product_name || ', Type: ' || v_exp_product_type || ', Price: ' || v_exp_price);
+  END LOOP;
+
+  CLOSE c_expensive_products;
+  
+  -- Task 3: Implicit Cursor for Updating Prices and Displaying Row Count
+  DBMS_OUTPUT.PUT_LINE('--- Updating Prices of All Products by 1000 ---');
+  
+  UPDATE Products
+  SET Price = Price + 1000;
+
+  DBMS_OUTPUT.PUT_LINE('Number of products updated: ' || SQL%ROWCOUNT);
+
+END;
