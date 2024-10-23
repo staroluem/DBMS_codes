@@ -1,0 +1,57 @@
+CREATE TABLE Employee (
+    emp_id INT PRIMARY KEY,
+    dept_id INT,
+    emp_name VARCHAR(50),
+    DoJ DATE,          -- Date of Joining
+    salary DECIMAL(10, 2),
+    commission DECIMAL(10, 2),
+    job_title VARCHAR(50)
+);
+
+CREATE OR REPLACE TRIGGER prevent_salary_decrease
+BEFORE UPDATE OF salary ON Employee
+FOR EACH ROW
+BEGIN
+    IF :NEW.salary < :OLD.salary THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Error: Salary cannot be decreased!');
+    END IF;
+END;
+/
+CREATE TABLE job_history (
+    emp_id INT,
+    old_job_title VARCHAR(50),
+    old_dept_id INT,
+    start_date DATE,    -- DoJ
+    end_date DATE       -- The date when job title was changed
+);
+CREATE OR REPLACE TRIGGER log_job_title_change
+BEFORE UPDATE OF job_title ON Employee
+FOR EACH ROW
+BEGIN
+    INSERT INTO job_history (emp_id, old_job_title, old_dept_id, start_date, end_date)
+    VALUES (
+        :OLD.emp_id,          -- Employee ID
+        :OLD.job_title,       -- Old Job Title
+        :OLD.dept_id,         -- Old Department ID
+        :OLD.DoJ,             -- Date of Joining (Start Date)
+        SYSDATE               -- System Date as the End Date
+    );
+END;
+/
+
+-- Insert sample data
+INSERT INTO Employee (emp_id, dept_id, emp_name, DoJ, salary, commission, job_title)
+VALUES (1, 101, 'John Doe', TO_DATE('2020-01-01', 'YYYY-MM-DD'), 5000, 200, 'Developer');
+
+-- Try to decrease the salary (this should raise an error)
+UPDATE Employee
+SET salary = 4000
+WHERE emp_id = 1;
+
+-- Update the job title
+UPDATE Employee
+SET job_title = 'Senior Developer'
+WHERE emp_id = 1;
+
+-- Check the job_history table to see the logged job title change
+SELECT * FROM job_history;
