@@ -1,0 +1,65 @@
+DECLARE
+    v_emp_id       Employee.emp_id%TYPE;
+    v_dept_id      Employee.dept_id%TYPE;
+    v_emp_name     Employee.emp_name%TYPE;
+    v_salary       Employee.salary%TYPE;
+    v_doj          Employee.DoJ%TYPE;
+    v_years_exp    NUMBER;
+    v_new_salary   Salary_Increment.new_salary%TYPE;
+    v_increment    NUMBER;
+    salary_too_low EXCEPTION;  -- User-defined exception
+
+BEGIN
+    -- Accept emp_id from the user
+    v_emp_id := &emp_id;
+
+    -- Fetch the employee details
+    SELECT salary, DoJ INTO v_salary, v_doj
+    FROM Employee
+    WHERE emp_id = v_emp_id;
+
+    -- Calculate the years of experience
+    v_years_exp := EXTRACT(YEAR FROM SYSDATE) - EXTRACT(YEAR FROM v_doj);
+
+    -- Determine the increment based on the experience
+    IF v_years_exp > 10 THEN
+        v_increment := v_salary * 0.20;  -- 20% increase
+    ELSIF v_years_exp > 5 THEN
+        v_increment := v_salary * 0.10;  -- 10% increase
+    ELSE
+        v_increment := v_salary * 0.05;  -- 5% increase
+    END IF;
+
+    -- Calculate the new salary
+    v_new_salary := v_salary + v_increment;
+
+    -- Check if new salary is too low (optional validation)
+    IF v_new_salary < 1000 THEN  -- Assuming a minimum threshold
+        RAISE salary_too_low;  -- Raise user-defined exception
+    END IF;
+
+    -- Insert the incremented salary into the Salary_Increment table
+    INSERT INTO Salary_Increment (emp_id, new_salary)
+    VALUES (v_emp_id, v_new_salary);
+
+    -- Commit the transaction
+    COMMIT;
+
+    DBMS_OUTPUT.PUT_LINE('Salary updated successfully for Employee ID: ' || v_emp_id);
+    DBMS_OUTPUT.PUT_LINE('New Salary: ' || v_new_salary);
+
+EXCEPTION
+    -- Handle no data found if the employee is not found
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Employee ID: ' || v_emp_id || ' not found.');
+
+    -- Handle salary too low error
+    WHEN salary_too_low THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Salary too low after increment for Employee ID: ' || v_emp_id);
+
+    -- Handle all other errors
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An unexpected error occurred: ' || SQLERRM);
+        ROLLBACK;
+END;
+/
