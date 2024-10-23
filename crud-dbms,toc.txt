@@ -1,0 +1,30 @@
+//crud-dbms,toc
+
+1.  db.st.find({courses:{$all:["dbms","toc"]}},{name:1,_id:0});
+2. db.Student.find(
+    { $or: [{ Marks: { $gt: 50 } }, { Class: "TE" }] },
+    { Roll_No: 1, Class: 1, _id: 0 }
+);
+
+
+3.db.Student.updateOne(
+    { Roll_No: "A10" },
+    {
+        $set: {
+            "Roll_No": "A10",
+            "Name": "Henry Watson",
+            "Class": "TE",
+            "Marks": 45,
+            "Address": "808 Sycamore Lane",
+            "Enrolled_Courses": ["AI", "Math"]
+        }
+    }
+);
+
+4.db.Student.find({}, { Name: 1, Marks: 1, _id: 0 })
+    .sort({ Marks: -1 })
+    .skip(2)
+    .limit(2);
+
+5.db.Student.deleteMany({ Marks: { $lt: 20 } });
+6.db.Student.deleteOne({});
