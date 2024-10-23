@@ -1,0 +1,30 @@
+create table cust(cid int,cname varchar(10),cadd varchar(10),phone int,email varchar(20),age int);
+insert into cust values(1,'anuja','pune',987,'a@gmail',20);
+insert into cust values(2,'soham','mum',988,'s@gmail',21);
+insert into cust values(3,'kriti','nagar',989,'k@gmail',22);
+insert into cust values(4,'anjana','nashik',986,'an@gmail',20);
+
+create table branch(bid int, bname varchar(20),badd varchar(20));
+insert into branch values(100,'sbi','pune');
+insert into branch values(200,'tbi','nagar');
+insert into branch values(300,'dbi','mum');
+
+create table account1(ano int, bid int, cid int,odate date,atype varchar(20),balance int);
+insert into account1 values(50,100,1,'12082004','saving',10000);
+insert into account1 values(51,200,2,'12082005','open',50000);
+insert into account1 values(52,300,3,'12082006','saving',100000);
+
+alter table cust modify email varchar(30);
+
+alter table cust modify email varchar(30) not null;
+
+select c.cname,a.balance from cust c, account1 a where c.cid=a.cid and a.balance>50000;
+
+select avg(balance) from account1 where atype='saving';
+
+select* from cust where cadd='pune' or cname like 'a%';
+
+create table saving as select ano,bid,cid,odate,balance from account1 where atype='saving';
+
+select c.cid,a.ano,a.bid,a.balance from cust c 
+join account1 a on c.cid=a.cid where a.balance>=50000 order by c.age;
