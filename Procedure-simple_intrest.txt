@@ -1,0 +1,35 @@
+create table acc(id int,name varchar(20),bal int,noyears int);
+insert into acc values(1,'raju',300,2);
+insert into acc values(2,'kaju',200,4);
+insert into acc values(3,'saju',500,3);
+select*from acc;
+
+create table intrest(id int,int_amt int);
+select*from intrest;
+
+SET SERVEROUTPUT ON;
+create or replace procedure cal_int(
+p_id in acc.id%type,
+p_int_rate in number) as
+
+v_bal acc.bal%type;
+v_years acc.noyears%type;
+v_amt number;
+begin
+
+    select bal,noyears into v_bal,v_years 
+    from acc where id=p_id;
+    
+    v_amt := (v_bal * p_int_rate * v_years)/100;
+    insert into intrest values(p_id,v_amt);   
+commit;
+for rec in(select*from intrest)
+loop
+    dbms_output.put_line('id:'||rec.id||',int_amt:'||rec.int_amt);
+    end loop;
+end cal_int;
+
+
+begin
+cal_int(1,5);
+end;
