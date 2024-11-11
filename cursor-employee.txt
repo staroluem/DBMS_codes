@@ -36,3 +36,26 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('Total Number of Employees: ' || v_total_rows);
 END;
 /
+3.
+SET SERVEROUTPUT ON;
+accept p_id number prompt 'enter Emp Id :'
+declare
+ cursor c_salary(p_id in number) is
+ select salary 
+ from emp1
+ where id=p_id;
+ 
+ v_sal emp1.salary%type;
+ 
+begin
+    open c_salary(&p_id);
+    fetch c_salary into v_sal;
+    
+    if c_salary%found then
+    dbms_output.put_line('salary of emp with emp_id' || &p_id || 'is:' || v_sal);
+    else
+    dbms_output.put_line('emp with id ' || &p_id || ' not found!!!!!!');
+    end if;
+    
+    close c_salary;
+end;
