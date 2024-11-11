@@ -84,3 +84,44 @@ BEGIN
   DBMS_OUTPUT.PUT_LINE('Number of products updated: ' || SQL%ROWCOUNT);
 
 END;
+
+
+---------or-----------user input------------
+
+SET SERVEROUTPUT ON;
+
+accept min_price number prompt 'Enter min price:'
+accept max_price number prompt 'Enter max price:'
+
+Declare
+    cursor c_apperal(p_min_price in number,p_max_price in number) is
+    select id,name,type, price from prod 
+    where type='Apparel' and price between p_min_price and p_max_price;
+    
+--    cursor c_ex is
+--    select id,name,type,price from prod
+--    where price>5000;
+--    
+    pro_rec prod%rowtype;
+
+begin 
+dbms_output.put_line('==========Products of type apperal in specific range===========');
+open c_apperal(&min_price,&max_price);
+loop
+    fetch c_apperal into pro_rec;
+    exit when c_apperal%notfound;
+    
+    dbms_output.put_line('ID:' || pro_rec.id || 'name:' || pro_rec.name || 'type:'|| pro_rec.type || 'price:' 
+    || pro_rec.price);
+end loop;
+close c_apperal;
+
+--dbms_output.put_line('============prod proce >5000=============');
+--open c_ex;
+--loop
+--    fetch c_ex into prod_rec;
+--    exit when c_ex%notfound;
+--    dbms_output.put_line('Id:' || prod_rec.id || 'name:' || prod_rec.name || 'type:' || 
+--    prod_rec.type || 'price:' || prod_rec.price);
+--end loop;
+end;
