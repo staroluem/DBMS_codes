@@ -1,0 +1,43 @@
+//mapReduce-Author_books
+1.
+db.Book.mapReduce(
+    function () {
+        emit(this.Author_name, this.Title);  // Emit Author as key and Title as value
+    },
+    function (key, values) {
+        return values;  // Collect all book titles under each author
+    },
+    {
+        out: "author_books_list"
+    }
+);
+
+2.
+db.Book.mapReduce(
+    function () {
+        if (this.Borrowed_status === true) {
+            emit(this.Author_name, this.Title);  // Emit Author as key and Title as value for borrowed books only
+        }
+    },
+    function (key, values) {
+        return values;  // Collect all borrowed book titles under each author
+    },
+    {
+        out: "borrowed_books_by_author"
+    }
+);
+
+3.
+db.Book.mapReduce(
+    function () {
+        if (this.Price > 300) {
+            emit(this.Author_name, this.Title);  // Emit Author as key and Title as value for books priced over 300
+        }
+    },
+    function (key, values) {
+        return values;  // Collect all titles under each author with price > 300
+    },
+    {
+        out: "expensive_books_by_author"
+    }
+);
