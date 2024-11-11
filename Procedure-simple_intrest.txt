@@ -16,7 +16,6 @@ v_bal acc.bal%type;
 v_years acc.noyears%type;
 v_amt number;
 begin
-
     select bal,noyears into v_bal,v_years 
     from acc where id=p_id;
     
