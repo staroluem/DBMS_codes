@@ -1,6 +1,6 @@
 //crud-dbms,toc
 
-1.  db.st.find({courses:{$all:["dbms","toc"]}},{name:1,_id:0});
+1.  db.st.find({courses:{$in:["dbms","toc"]}},{name:1,_id:0});
 2. db.Student.find(
     { $or: [{ Marks: { $gt: 50 } }, { Class: "TE" }] },
     { Roll_No: 1, Class: 1, _id: 0 }
