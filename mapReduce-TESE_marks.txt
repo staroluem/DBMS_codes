@@ -1,0 +1,33 @@
+//mapReduce-TE/SE_marks
+
+1.
+db.Student.mapReduce(
+    function () {
+        if (this.class === "TE") {
+            emit(this.dept, this.aggregate_marks);  // Emit dept as key and marks as value
+        }
+    },
+    function (key, values) {
+        return Array.sum(values);  // Sum all values for the same dept key
+    },
+    {
+        out: "total_marks_TE"
+    }
+);
+
+2.
+db.Student.mapReduce(
+    function () {
+        if (this.class === "SE") {
+            emit(this.dept, this.aggregate_marks);  // Emit dept as key and marks as value
+        }
+    },
+    function (key, values) {
+        return Math.max.apply(null, values);  // Find max value for the same dept key
+    },
+    {
+        out: "highest_marks_SE"
+    }
+);
+
+
